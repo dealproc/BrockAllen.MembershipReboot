@@ -3,6 +3,7 @@
  * see license.txt
  */
 
+#if net46
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -10,14 +11,17 @@ using System.Globalization;
 using System.IdentityModel.Tokens;
 using System.Linq;
 using System.Security.Claims;
+using BrockAllen.MembershipReboot.Logging;
 
 namespace BrockAllen.MembershipReboot
 {
     public abstract class AuthenticationService<TAccount>
         where TAccount : UserAccount
     {
+        static ILog _log = LogProvider.For<AuthenticationService<TAccount>>();
+
         public UserAccountService<TAccount> UserAccountService { get; set; }
-        public ClaimsAuthenticationManager ClaimsAuthenticationManager { get; set; }
+        public System.Security.Claims.ClaimsAuthenticationManager ClaimsAuthenticationManager { get; set; }
 
         public AuthenticationService(UserAccountService<TAccount> userService)
             : this(userService, null)
@@ -52,7 +56,7 @@ namespace BrockAllen.MembershipReboot
             if (account == null) throw new ArgumentNullException("account");
             if (String.IsNullOrWhiteSpace(method)) throw new ArgumentNullException("method");
 
-            Tracing.Information("[AuthenticationService.SignIn] sign in called: {0}", account.ID);
+            _log.Info("[AuthenticationService.SignIn] sign in called: {0}", account.ID);
 
             if (!account.IsLoginAllowed || account.IsAccountClosed)
             {
@@ -73,7 +77,7 @@ namespace BrockAllen.MembershipReboot
                 account.RequiresPasswordReset || 
                 this.UserAccountService.IsPasswordExpired(account))
             {
-                Tracing.Verbose("[AuthenticationService.SignIn] detected account requires two factor or password reset to sign in: {0}", account.ID);
+                _log.Trace("[AuthenticationService.SignIn] detected account requires two factor or password reset to sign in: {0}", account.ID);
                 IssuePartialSignInToken(account, method);
                 return;
             }
@@ -95,7 +99,7 @@ namespace BrockAllen.MembershipReboot
             }
 
             // issue cookie
-            Tracing.Verbose("[AuthenticationService.SignIn] token issued: {0}", account.ID);
+            _log.Trace("[AuthenticationService.SignIn] token issued: {0}", account.ID);
             IssueToken(cp, persistentCookie: persistent);
         }
 
@@ -148,7 +152,7 @@ namespace BrockAllen.MembershipReboot
         {
             if (account == null) throw new ArgumentNullException("account");
 
-            Tracing.Verbose("[AuthenticationService.IssuePartialSignInCookieForTwoFactorAuth] Account ID: {0}", account.ID);
+            _log.Trace("[AuthenticationService.IssuePartialSignInCookieForTwoFactorAuth] Account ID: {0}", account.ID);
 
             var claims = GetBasicClaims(account, method).Union(GetPendingAuthClaims(account));
             
@@ -204,13 +208,13 @@ namespace BrockAllen.MembershipReboot
             if (String.IsNullOrWhiteSpace(providerAccountID)) throw new ArgumentException("providerAccountID");
             if (claims == null) throw new ArgumentNullException("claims");
 
-            Tracing.Information("[AuthenticationService.SignInWithLinkedAccount] tenant: {0}, provider: {1}, id: {2}", tenant, providerName, providerAccountID);
+            _log.Info("[AuthenticationService.SignInWithLinkedAccount] tenant: {0}, provider: {1}, id: {2}", tenant, providerName, providerAccountID);
 
             var user = GetCurrentPrincipal();
             if (user != null && user.Identity.IsAuthenticated)
             {
                 // already logged in, so use the current user's account
-                Tracing.Verbose("[AuthenticationService.SignInWithLinkedAccount] user already logged in as: {0}", user.Identity.Name);
+                _log.Trace("[AuthenticationService.SignInWithLinkedAccount] user already logged in as: {0}", user.Identity.Name);
                 account = this.UserAccountService.GetByID(user.GetUserID());
             }
             else
@@ -219,7 +223,7 @@ namespace BrockAllen.MembershipReboot
                 account = this.UserAccountService.GetByLinkedAccount(tenant, providerName, providerAccountID);
                 if (account == null)
                 {
-                    Tracing.Verbose("[AuthenticationService.SignInWithLinkedAccount] linked account not found");
+                    _log.Trace("[AuthenticationService.SignInWithLinkedAccount] linked account not found");
                     
                     // no account associated, so create one
                     // we need email
@@ -257,7 +261,7 @@ namespace BrockAllen.MembershipReboot
 
                     // create account without password -- user can verify their email and then 
                     // do a password reset to assign password
-                    Tracing.Verbose("[AuthenticationService.SignInWithLinkedAccount] creating account: {0}, {1}", name, email);
+                    _log.Trace("[AuthenticationService.SignInWithLinkedAccount] creating account: {0}, {1}", name, email);
                     
                     account = this.UserAccountService.CreateUserAccount();
                     
@@ -269,7 +273,7 @@ namespace BrockAllen.MembershipReboot
                 }
                 else
                 {
-                    Tracing.Verbose("[AuthenticationService.SignInWithLinkedAccount] linked account found: {0}", account.ID);
+                    _log.Trace("[AuthenticationService.SignInWithLinkedAccount] linked account found: {0}", account.ID);
                 }
             }
 
@@ -281,7 +285,7 @@ namespace BrockAllen.MembershipReboot
             // log them in if the account if they're verified
             if (account.IsAccountVerified || !UserAccountService.Configuration.RequireAccountVerification)
             {
-                Tracing.Verbose("[AuthenticationService.SignInWithLinkedAccount] signing user in: {0}", account.ID);
+                _log.Trace("[AuthenticationService.SignInWithLinkedAccount] signing user in: {0}", account.ID);
                 // signin from the account
                 // if we want to include the provider's claims, then perhaps this
                 // should be done in the claims transformer
@@ -289,7 +293,7 @@ namespace BrockAllen.MembershipReboot
             }
             else
             {
-                Tracing.Error("[AuthenticationService.SignInWithLinkedAccount] user account not verified, not allowed to login: {0}", account.ID);
+                _log.Error("[AuthenticationService.SignInWithLinkedAccount] user account not verified, not allowed to login: {0}", account.ID);
             }
         }
 
@@ -304,7 +308,7 @@ namespace BrockAllen.MembershipReboot
             var p = this.GetCurrentPrincipal();
             if (p.HasUserID())
             {
-                Tracing.Information("[AuthenticationService.SignOut] called: {0}", p.GetUserID());
+                _log.Info("[AuthenticationService.SignOut] called: {0}", p.GetUserID());
             }
 
             // clear cookie
@@ -331,3 +335,4 @@ namespace BrockAllen.MembershipReboot
         }
     }
 }
+#endif

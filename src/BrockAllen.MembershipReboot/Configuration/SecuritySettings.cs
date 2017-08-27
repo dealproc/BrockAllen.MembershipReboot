@@ -3,6 +3,7 @@
  * see license.txt
  */
 
+#if NET46
 using System;
 using System.Configuration;
 using System.Linq;
@@ -57,102 +58,89 @@ namespace BrockAllen.MembershipReboot
         private const string VERIFICATIONKEYLIFETIME = "verificationKeyLifetime";
 
         [ConfigurationProperty(MULTITENANT, DefaultValue = MembershipRebootConstants.SecuritySettingDefaults.MultiTenant)]
-        public bool MultiTenant
-        {
+        public bool MultiTenant {
             get { return (bool)this[MULTITENANT]; }
             set { this[MULTITENANT] = value; }
         }
 
         [ConfigurationProperty(DEFAULTTENANT, DefaultValue = MembershipRebootConstants.SecuritySettingDefaults.DefaultTenant)]
-        public string DefaultTenant
-        {
+        public string DefaultTenant {
             get { return (string)this[DEFAULTTENANT]; }
             set { this[DEFAULTTENANT] = value; }
         }
 
         [ConfigurationProperty(EMAILISUSERNAME, DefaultValue = MembershipRebootConstants.SecuritySettingDefaults.EmailIsUsername)]
-        public bool EmailIsUsername
-        {
+        public bool EmailIsUsername {
             get { return (bool)this[EMAILISUSERNAME]; }
             set { this[EMAILISUSERNAME] = value; }
         }
-        
+
         [ConfigurationProperty(EMAILISUNIQUE, DefaultValue = MembershipRebootConstants.SecuritySettingDefaults.EmailIsUnique)]
-        public bool EmailIsUnique
-        {
+        public bool EmailIsUnique {
             get { return (bool)this[EMAILISUNIQUE]; }
             set { this[EMAILISUNIQUE] = value; }
         }
 
         [ConfigurationProperty(USERNAMESUNIQUEACROSSTENANTS, DefaultValue = MembershipRebootConstants.SecuritySettingDefaults.UsernamesUniqueAcrossTenants)]
-        public bool UsernamesUniqueAcrossTenants
-        {
+        public bool UsernamesUniqueAcrossTenants {
             get { return (bool)this[USERNAMESUNIQUEACROSSTENANTS]; }
             set { this[USERNAMESUNIQUEACROSSTENANTS] = value; }
         }
 
         [ConfigurationProperty(REQUIREACCOUNTVERIFICATION, DefaultValue = MembershipRebootConstants.SecuritySettingDefaults.RequireAccountVerification)]
-        public bool RequireAccountVerification
-        {
+        public bool RequireAccountVerification {
             get { return (bool)this[REQUIREACCOUNTVERIFICATION]; }
             set { this[REQUIREACCOUNTVERIFICATION] = value; }
         }
 
         [ConfigurationProperty(REQUIREACCOUNTAPPROVAL, DefaultValue = MembershipRebootConstants.SecuritySettingDefaults.RequireAccountApproval)]
-        public bool RequireAccountApproval
-        {
+        public bool RequireAccountApproval {
             get { return (bool)this[REQUIREACCOUNTAPPROVAL]; }
             set { this[REQUIREACCOUNTAPPROVAL] = value; }
         }
 
         [Obsolete("Replaced by RequireAccountApproval")]
         [ConfigurationProperty(ALLOWLOGINAFTERACCOUNTCREATION, DefaultValue = MembershipRebootConstants.SecuritySettingDefaults.AllowLoginAfterAccountCreation)]
-        public bool AllowLoginAfterAccountCreation
-        {
+        public bool AllowLoginAfterAccountCreation {
             get { return (bool)this[ALLOWLOGINAFTERACCOUNTCREATION]; }
             set { this[ALLOWLOGINAFTERACCOUNTCREATION] = value; }
         }
 
         [ConfigurationProperty(ACCOUNTLOCKOUTFAILEDLOGINATTEMPTS, DefaultValue = MembershipRebootConstants.SecuritySettingDefaults.AccountLockoutFailedLoginAttempts)]
-        public int AccountLockoutFailedLoginAttempts
-        {
+        public int AccountLockoutFailedLoginAttempts {
             get { return (int)this[ACCOUNTLOCKOUTFAILEDLOGINATTEMPTS]; }
             set { this[ACCOUNTLOCKOUTFAILEDLOGINATTEMPTS] = value; }
         }
 
         [ConfigurationProperty(ACCOUNTLOCKOUTDURATION, DefaultValue = MembershipRebootConstants.SecuritySettingDefaults.AccountLockoutDuration)]
-        public TimeSpan AccountLockoutDuration
-        {
+        public TimeSpan AccountLockoutDuration {
             get { return (TimeSpan)this[ACCOUNTLOCKOUTDURATION]; }
             set { this[ACCOUNTLOCKOUTDURATION] = value; }
         }
 
         [ConfigurationProperty(ALLOWACCOUNTDELETION, DefaultValue = MembershipRebootConstants.SecuritySettingDefaults.AllowAccountDeletion)]
-        public bool AllowAccountDeletion
-        {
+        public bool AllowAccountDeletion {
             get { return (bool)this[ALLOWACCOUNTDELETION]; }
             set { this[ALLOWACCOUNTDELETION] = value; }
         }
 
         [ConfigurationProperty(PASSWORDHASHINGITERATIONCOUNT, DefaultValue = MembershipRebootConstants.SecuritySettingDefaults.PasswordHashingIterationCount)]
-        public int PasswordHashingIterationCount
-        {
+        public int PasswordHashingIterationCount {
             get { return (int)this[PASSWORDHASHINGITERATIONCOUNT]; }
             set { this[PASSWORDHASHINGITERATIONCOUNT] = value; }
         }
 
         [ConfigurationProperty(PASSWORDRESETFREQUENCY, DefaultValue = MembershipRebootConstants.SecuritySettingDefaults.PasswordResetFrequency)]
-        public int PasswordResetFrequency
-        {
+        public int PasswordResetFrequency {
             get { return (int)this[PASSWORDRESETFREQUENCY]; }
             set { this[PASSWORDRESETFREQUENCY] = value; }
         }
 
         [ConfigurationProperty(VERIFICATIONKEYLIFETIME, DefaultValue = MembershipRebootConstants.SecuritySettingDefaults.VerificationKeyLifetime)]
-        public TimeSpan VerificationKeyLifetime
-        {
+        public TimeSpan VerificationKeyLifetime {
             get { return (TimeSpan)this[VERIFICATIONKEYLIFETIME]; }
             set { this[VERIFICATIONKEYLIFETIME] = value; }
         }
     }
 }
+#endif

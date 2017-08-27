@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 namespace BrockAllen.MembershipReboot
 {
@@ -126,7 +127,7 @@ namespace BrockAllen.MembershipReboot
         {
             name = String.Format(ResourcePathTemplate, name);
 
-            var asm = typeof(EmailMessageFormatter<>).Assembly;
+            var asm = typeof(EmailMessageFormatter<>).GetTypeInfo().Assembly;
             using (var s = asm.GetManifestResourceStream(name))
             {
                 if (s == null) return null;

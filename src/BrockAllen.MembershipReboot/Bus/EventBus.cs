@@ -7,6 +7,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace BrockAllen.MembershipReboot
 {
@@ -38,7 +39,7 @@ namespace BrockAllen.MembershipReboot
                 var eventHandlerType = typeof(IEventHandler<>).MakeGenericType(eventType);
                 var query =
                     from handler in this
-                    where eventHandlerType.IsAssignableFrom(handler.GetType())
+                    where eventHandlerType.GetTypeInfo().IsAssignableFrom(handler.GetType().GetTypeInfo())
                     select handler;
                 var handlers = query.ToArray().Cast<IEventHandler>();
                 handlerCache[eventType] = handlers;

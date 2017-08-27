@@ -26,10 +26,18 @@ namespace BrockAllen.MembershipReboot.Helpers
         internal static byte[] GenerateSaltInternal(int byteLength = SaltSize)
         {
             byte[] buf = new byte[byteLength];
+#if net46
             using (var rng = new RNGCryptoServiceProvider())
             {
                 rng.GetBytes(buf);
             }
+#else
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(buf);
+            }
+#endif
+
             return buf;
         }
 
@@ -56,6 +64,7 @@ namespace BrockAllen.MembershipReboot.Helpers
                 throw new ArgumentNullException("input");
             }
 
+#if net46
             using (HashAlgorithm alg = HashAlgorithm.Create(algorithm))
             {
                 if (alg != null)
@@ -68,6 +77,14 @@ namespace BrockAllen.MembershipReboot.Helpers
                     throw new InvalidOperationException();//String.Format(CultureInfo.InvariantCulture, HelpersResources.Crypto_NotSupportedHashAlg, algorithm));
                 }
             }
+#else
+            if (!algorithm.Equals("sha256", StringComparison.OrdinalIgnoreCase)) { throw new ArgumentException("Can only use sha256 at this time."); }
+            using (var alg = System.Security.Cryptography.SHA256.Create())
+            {
+                var hashData = alg.ComputeHash(input);
+                return BinaryToHex(hashData);
+            }
+#endif
         }
 
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SHA", Justification = "Consistent with the Framework, which uses SHA")]

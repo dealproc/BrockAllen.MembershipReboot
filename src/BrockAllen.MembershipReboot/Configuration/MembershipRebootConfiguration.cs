@@ -4,12 +4,14 @@
  */
 
 using System;
+using System.Reflection;
 
 namespace BrockAllen.MembershipReboot
 {
     public class MembershipRebootConfiguration<TAccount>
         where TAccount : UserAccount
     {
+#if net46
         public MembershipRebootConfiguration()
             : this(SecuritySettings.Instance)
         {
@@ -36,6 +38,7 @@ namespace BrockAllen.MembershipReboot
 
             this.Crypto = new DefaultCrypto();
         }
+#endif
 
         public bool MultiTenant { get; set; }
         public string DefaultTenant { get; set; }
@@ -116,10 +119,10 @@ namespace BrockAllen.MembershipReboot
             var interfaces = type.GetInterfaces();
             foreach (var itf in interfaces)
             {
-                if (itf.IsGenericType && itf.GetGenericTypeDefinition() == typeof(IEventHandler<>))
+                if (itf.GetTypeInfo().IsGenericTypeDefinition && itf.GetGenericTypeDefinition() == typeof(IEventHandler<>))
                 {
                     var eventHandlerType = itf.GetGenericArguments()[0];
-                    if (eventHandlerType.IsGenericType)
+                    if (eventHandlerType.GetTypeInfo().IsGenericTypeDefinition)
                     {
                         var targetUserAccountType = eventHandlerType.GetGenericArguments()[0];
                         var isSameType = targetUserAccountType == typeof(TAccount);
@@ -139,10 +142,10 @@ namespace BrockAllen.MembershipReboot
             var interfaces = type.GetInterfaces();
             foreach (var itf in interfaces)
             {
-                if (itf.IsGenericType && itf.GetGenericTypeDefinition() == typeof(ICommandHandler<>))
+                if (itf.GetTypeInfo().IsGenericType && itf.GetGenericTypeDefinition() == typeof(ICommandHandler<>))
                 {
                     var eventHandlerType = itf.GetGenericArguments()[0];
-                    if (eventHandlerType.IsGenericType)
+                    if (eventHandlerType.GetTypeInfo().IsGenericType)
                     {
                         var targetUserAccountType = eventHandlerType.GetGenericArguments()[0];
                         var isSameType = targetUserAccountType == typeof(TAccount);
@@ -162,6 +165,7 @@ namespace BrockAllen.MembershipReboot
     
     public class MembershipRebootConfiguration : MembershipRebootConfiguration<UserAccount>
     {
+#if net46
         public MembershipRebootConfiguration()
             : this(SecuritySettings.Instance)
         {
@@ -171,5 +175,6 @@ namespace BrockAllen.MembershipReboot
             : base(securitySettings)
         {
         }
+#endif
     }
 }

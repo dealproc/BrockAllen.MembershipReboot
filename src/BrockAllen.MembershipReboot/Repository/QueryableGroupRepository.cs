@@ -45,13 +45,7 @@ namespace BrockAllen.MembershipReboot
 
         public abstract System.Collections.Generic.IEnumerable<TGroup> GetByChildID(Guid childGroupID);
 
-        protected virtual IQueryable<TGroup> SortedQueryable
-        {
-            get
-            {
-                return Queryable.OrderBy(x => x.Tenant).ThenBy(x => x.Name);
-            }
-        }
+        protected virtual IQueryable<TGroup> SortedQueryable => Queryable.OrderBy(x => x.Tenant).ThenBy(x => x.Name);
 
         // IGroupQuery
         public System.Collections.Generic.IEnumerable<string> GetAllTenants()

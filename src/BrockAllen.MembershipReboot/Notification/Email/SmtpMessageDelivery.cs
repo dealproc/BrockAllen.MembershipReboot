@@ -4,14 +4,17 @@
  */
 
 using System;
-using System.Configuration;
-using System.Net.Configuration;
-using System.Net.Mail;
+using BrockAllen.MembershipReboot.Logging;
+using MailKit.Net.Smtp;
+using MimeKit;
+using MimeKit.Text;
 
 namespace BrockAllen.MembershipReboot
 {
     public class SmtpMessageDelivery : IMessageDelivery
     {
+        static ILog _log = LogProvider.For<SmtpMessageDelivery>();
+
         public bool SendAsHtml { get; set; }
         public int SmtpTimeout { get; set; }
 
@@ -23,16 +26,17 @@ namespace BrockAllen.MembershipReboot
 
         public void Send(Message msg)
         {
-            Tracing.Information("[SmtpMessageDelivery.Send] sending mail to " + msg.To);
+            _log.Info("[SmtpMessageDelivery.Send] sending mail to " + msg.To);
             if (!String.IsNullOrWhiteSpace(msg.Cc))
             {
-                Tracing.Information("[SmtpMessageDelivery.Send] cc'ing mail to " + msg.Cc);
+                _log.Info("[SmtpMessageDelivery.Send] cc'ing mail to " + msg.Cc);
             }
 
             if (String.IsNullOrWhiteSpace(msg.From))
             {
-                SmtpSection smtp = ConfigurationManager.GetSection("system.net/mailSettings/smtp") as SmtpSection;
-                msg.From = smtp.From;
+                //SmtpSection smtp = ConfigurationManager.GetSection("system.net/mailSettings/smtp") as SmtpSection;
+                //msg.From = smtp.From;
+                throw new ArgumentNullException("msg.From", "Whom is the sender of this email?");
             }
 
             using (SmtpClient smtp = new SmtpClient())
@@ -40,26 +44,28 @@ namespace BrockAllen.MembershipReboot
                 smtp.Timeout = SmtpTimeout;
                 try
                 {
-                    MailMessage mailMessage = new MailMessage(msg.From, msg.To, msg.Subject, msg.Body)
+                    var mailMessage = new MimeMessage();
+                    mailMessage.From.Add(new MailboxAddress(msg.From));
+                    mailMessage.To.Add(new MailboxAddress(msg.To));
+                    mailMessage.Subject = msg.Subject;
+                    
+                    mailMessage.Body = new TextPart(this.SendAsHtml ? TextFormat.Html : TextFormat.Text)
                     {
-                        IsBodyHtml = SendAsHtml
+                         Text = msg.Body
                     };
+
                     if (!String.IsNullOrWhiteSpace(msg.Cc))
                     {
                         foreach (string email in msg.Cc.Split(',', ';'))
                         {
-                            mailMessage.CC.Add(email);
+                            mailMessage.Cc.Add(new MailboxAddress(email));
                         }
                     }
                     smtp.Send(mailMessage);
                 }
-                catch (SmtpException e)
-                {
-                    Tracing.Error("[SmtpMessageDelivery.Send] SmtpException: " + e.Message);
-                }
                 catch (Exception e)
                 {
-                    Tracing.Error("[SmtpMessageDelivery.Send] Exception: " + e.Message);
+                    _log.Error("[SmtpMessageDelivery.Send] Exception: " + e.Message);
                 }
             }
         }

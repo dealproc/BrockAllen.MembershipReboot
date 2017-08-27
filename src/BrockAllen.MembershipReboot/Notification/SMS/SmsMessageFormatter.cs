@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 namespace BrockAllen.MembershipReboot
 {
@@ -59,7 +60,7 @@ namespace BrockAllen.MembershipReboot
         const string ResourcePathTemplate = "BrockAllen.MembershipReboot.Notification.SMS.SmsTemplates.Code.txt";
         string LoadTemplate()
         {
-            var asm = typeof(SmsMessageFormatter<>).Assembly;
+            var asm = typeof(SmsMessageFormatter<>).GetTypeInfo().Assembly;
             using (var s = asm.GetManifestResourceStream(ResourcePathTemplate))
             {
                 if (s == null) return null;

@@ -5,6 +5,7 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using BrockAllen.MembershipReboot.Logging;
 
 namespace BrockAllen.MembershipReboot
 {
@@ -12,6 +13,8 @@ namespace BrockAllen.MembershipReboot
         IEventHandler<CertificateAddedEvent<TAccount>>
         where TAccount : UserAccount
     {
+        static ILog _log = LogProvider.For<UserAccountValidator<TAccount>>();
+
         UserAccountService<TAccount> userAccountService;
         public UserAccountValidator(UserAccountService<TAccount> userAccountService)
         {
@@ -29,7 +32,7 @@ namespace BrockAllen.MembershipReboot
             var otherAccount = userAccountService.GetByCertificate(account.Tenant, evt.Certificate.Thumbprint);
             if (otherAccount != null && otherAccount.ID != account.ID)
             {
-                Tracing.Verbose("[UserAccountValidation.CertificateThumbprintMustBeUnique] validation failed: {0}, {1}", account.Tenant, account.Username);
+                _log.Trace("[UserAccountValidation.CertificateThumbprintMustBeUnique] validation failed: {0}, {1}", account.Tenant, account.Username);
                 throw new ValidationException(userAccountService.GetValidationMessage("CertificateAlreadyInUse"));
             }
         }

@@ -6,12 +6,16 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Reflection;
+using BrockAllen.MembershipReboot.Logging;
 
 namespace BrockAllen.MembershipReboot
 {
     public class EmailEventHandler<TAccount>
         where TAccount: UserAccount
     {
+        static ILog _log = LogProvider.For<EmailEventHandler<TAccount>>();
+
         IMessageFormatter<TAccount> messageFormatter;
         IMessageDelivery messageDelivery;
 
@@ -22,20 +26,18 @@ namespace BrockAllen.MembershipReboot
 
         public EmailEventHandler(IMessageFormatter<TAccount> messageFormatter, IMessageDelivery messageDelivery)
         {
-            if (messageFormatter == null) throw new ArgumentNullException("messageFormatter");
-            if (messageDelivery == null) throw new ArgumentNullException("messageDelivery");
-
-            this.messageFormatter = messageFormatter;
-            this.messageDelivery = messageDelivery;
+            this.messageFormatter = messageFormatter ?? throw new ArgumentNullException("messageFormatter");
+            this.messageDelivery = messageDelivery ?? throw new ArgumentNullException("messageDelivery");
         }
 
         public virtual void Process(UserAccountEvent<TAccount> evt, object extra = null)
         {
-            Tracing.Information("[{0}] Processing Event: {1}", this.GetType(), evt.GetType());
+            _log.Info("[{0}] Processing Event: {1}", this.GetType(), evt.GetType());
             
             var data = new Dictionary<string, string>();
             if (extra != null)
             {
+#if net46
                 foreach (PropertyDescriptor descriptor in TypeDescriptor.GetProperties(extra))
                 {
                     object obj2 = descriptor.GetValue(extra);
@@ -44,6 +46,16 @@ namespace BrockAllen.MembershipReboot
                         data.Add(descriptor.Name, obj2.ToString());
                     }
                 }
+#else
+                foreach (var x in extra.GetType().GetTypeInfo().DeclaredMembers)
+                {
+                    var obj2 = extra.GetType().GetMember(x.Name).GetValue(0);
+                    if (obj2 != null)
+                    {
+                        data.Add(x.Name, obj2.ToString());
+                    }
+                }
+#endif
             }
 
             var msg = this.messageFormatter.Format(evt, data);

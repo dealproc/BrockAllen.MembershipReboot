@@ -6,18 +6,21 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using BrockAllen.MembershipReboot.Logging;
 
 namespace BrockAllen.MembershipReboot
 {
     internal class UserAccountValidation<TAccount>
         where TAccount : UserAccount
     {
+        static ILog _log = LogProvider.For<UserAccountValidation<TAccount>>();
+
         public static readonly IValidator<TAccount> UsernameDoesNotContainAtSign =
             new DelegateValidator<TAccount>((service, account, value) =>
             {
                 if (value.Contains("@"))
                 {
-                    Tracing.Verbose("[UserAccountValidation.UsernameDoesNotContainAtSign] validation failed: {0}, {1}, {2}", account.Tenant, account.Username, value);
+                    _log.Trace("[UserAccountValidation.UsernameDoesNotContainAtSign] validation failed: {0}, {1}, {2}", account.Tenant, account.Username, value);
 
                     return new ValidationResult(service.GetValidationMessage(MembershipRebootConstants.ValidationMessages.UsernameCannotContainAtSign));
                 }
@@ -41,7 +44,7 @@ namespace BrockAllen.MembershipReboot
                            var doubleChar = specialChar.ToString() + specialChar.ToString();
                            if (value.Contains(doubleChar))
                            {
-                               Tracing.Verbose("[UserAccountValidation.UsernameOnlySingleInstanceOfSpecialCharacters] validation failed: {0}, {1}, {2}", account.Tenant, account.Username, value);
+                               _log.Trace("[UserAccountValidation.UsernameOnlySingleInstanceOfSpecialCharacters] validation failed: {0}, {1}, {2}", account.Tenant, account.Username, value);
                                return new ValidationResult(service.GetValidationMessage(MembershipRebootConstants.ValidationMessages.UsernameCannotRepeatSpecialCharacters));
                            }
                        }
@@ -54,7 +57,7 @@ namespace BrockAllen.MembershipReboot
             {
                 if (!value.All(x => IsValidUsernameChar(x)))
                 {
-                    Tracing.Verbose("[UserAccountValidation.UsernameOnlyContainsValidCharacters] validation failed: {0}, {1}, {2}", account.Tenant, account.Username, value);
+                    _log.Trace("[UserAccountValidation.UsernameOnlyContainsValidCharacters] validation failed: {0}, {1}, {2}", account.Tenant, account.Username, value);
 
                     return new ValidationResult(service.GetValidationMessage(MembershipRebootConstants.ValidationMessages.UsernameOnlyContainsValidCharacters));
                 }
@@ -66,7 +69,7 @@ namespace BrockAllen.MembershipReboot
                    {
                        if (!Char.IsLetterOrDigit(value.First()) || !Char.IsLetterOrDigit(value.Last()))
                        {
-                           Tracing.Verbose("[UserAccountValidation.UsernameCanOnlyStartOrEndWithLetterOrDigit] validation failed: {0}, {1}, {2}", account.Tenant, account.Username, value);
+                           _log.Trace("[UserAccountValidation.UsernameCanOnlyStartOrEndWithLetterOrDigit] validation failed: {0}, {1}, {2}", account.Tenant, account.Username, value);
 
                            return new ValidationResult(service.GetValidationMessage(MembershipRebootConstants.ValidationMessages.UsernameCanOnlyStartOrEndWithLetterOrDigit));
                        }
@@ -78,7 +81,7 @@ namespace BrockAllen.MembershipReboot
             {
                 if (service.UsernameExists(account.Tenant, value))
                 {
-                    Tracing.Verbose("[UserAccountValidation.UsernameMustNotAlreadyExist] validation failed: {0}, {1}, {2}", account.Tenant, account.Username, value);
+                    _log.Trace("[UserAccountValidation.UsernameMustNotAlreadyExist] validation failed: {0}, {1}, {2}", account.Tenant, account.Username, value);
 
                     return new ValidationResult(service.GetValidationMessage(MembershipRebootConstants.ValidationMessages.UsernameAlreadyInUse));
                 }
@@ -91,7 +94,7 @@ namespace BrockAllen.MembershipReboot
                 if (service.Configuration.RequireAccountVerification &&
                     String.IsNullOrWhiteSpace(value))
                 {
-                    Tracing.Verbose("[UserAccountValidation.EmailRequired] validation failed: {0}, {1}", account.Tenant, account.Username);
+                    _log.Trace("[UserAccountValidation.EmailRequired] validation failed: {0}, {1}", account.Tenant, account.Username);
 
                     return new ValidationResult(service.GetValidationMessage(MembershipRebootConstants.ValidationMessages.EmailRequired));
                 }
@@ -106,7 +109,7 @@ namespace BrockAllen.MembershipReboot
                     EmailAddressAttribute validator = new EmailAddressAttribute();
                     if (!validator.IsValid(value))
                     {
-                        Tracing.Verbose("[UserAccountValidation.EmailIsValidFormat] validation failed: {0}, {1}, {2}", account.Tenant, account.Username, value);
+                        _log.Trace("[UserAccountValidation.EmailIsValidFormat] validation failed: {0}, {1}, {2}", account.Tenant, account.Username, value);
 
                         return new ValidationResult(service.GetValidationMessage(MembershipRebootConstants.ValidationMessages.InvalidEmail));
                     }
@@ -129,7 +132,7 @@ namespace BrockAllen.MembershipReboot
             {
                 if (!String.IsNullOrWhiteSpace(value) && service.EmailExistsOtherThan(account, value))
                 {
-                    Tracing.Verbose("[UserAccountValidation.EmailMustNotAlreadyExist] validation failed: {0}, {1}, {2}", account.Tenant, account.Username, value);
+                    _log.Trace("[UserAccountValidation.EmailMustNotAlreadyExist] validation failed: {0}, {1}, {2}", account.Tenant, account.Username, value);
 
                     return new ValidationResult(service.GetValidationMessage(MembershipRebootConstants.ValidationMessages.EmailAlreadyInUse));
                 }
@@ -143,7 +146,7 @@ namespace BrockAllen.MembershipReboot
             // we don't want to run this logic if it's a new account
             if (!account.IsNew() && service.VerifyHashedPassword(account, value))
             {
-                Tracing.Verbose("[UserAccountValidation.PasswordMustBeDifferentThanCurrent] validation failed: {0}, {1}", account.Tenant, account.Username);
+                _log.Trace("[UserAccountValidation.PasswordMustBeDifferentThanCurrent] validation failed: {0}, {1}", account.Tenant, account.Username);
 
                 return new ValidationResult(service.GetValidationMessage(MembershipRebootConstants.ValidationMessages.NewPasswordMustBeDifferent));
             }
