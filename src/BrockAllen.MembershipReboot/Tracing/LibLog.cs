@@ -39,9 +39,12 @@
 #pragma warning disable 1591
 
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 [assembly: SuppressMessage("Microsoft.Design", "CA1020:AvoidNamespacesWithFewTypes", Scope = "namespace", Target = "BrockAllen.MembershipReboot.Logging")]
 [assembly: SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Scope = "member", Target = "BrockAllen.MembershipReboot.Logging.Logger.#Invoke(BrockAllen.MembershipReboot.Logging.LogLevel,System.Func`1<System.String>,System.Exception,System.Object[])")]
+[assembly: InternalsVisibleTo("BrockAllen.MembershipReboot.WebHost")]
+[assembly: InternalsVisibleTo("BrockAllen.MembershipReboot.Test")]
 
 // If you copied this file manually, you need to change all "BrockAllen.MembershipReboot" so not to clash with other libraries
 // that use LibLog

@@ -15,13 +15,6 @@ namespace BrockAllen.MembershipReboot.Test
         {
         }
 
-        protected internal override DateTime UtcNow
-        {
-            get
-            {
-                if (Now != null) return Now.Value;
-                else return base.UtcNow;
-            }
-        }
+        protected internal override DateTime UtcNow => Now != null ? Now.Value : base.UtcNow;
     }
 }

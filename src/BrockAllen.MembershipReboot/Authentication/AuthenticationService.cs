@@ -3,7 +3,7 @@
  * see license.txt
  */
 
-#if net46
+#if NET46
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

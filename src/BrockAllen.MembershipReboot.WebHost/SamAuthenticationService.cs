@@ -7,11 +7,14 @@ using System;
 using System.IdentityModel.Services;
 using System.IdentityModel.Tokens;
 using System.Security.Claims;
+using BrockAllen.MembershipReboot.Logging;
 
 namespace BrockAllen.MembershipReboot.WebHost
 {
     public class SamAuthenticationService : AuthenticationService
     {
+        static ILog _log = LogProvider.For<SamAuthenticationService>();
+
         public SamAuthenticationService(UserAccountService userAccountService)
             : base(userAccountService)
         {
@@ -26,7 +29,7 @@ namespace BrockAllen.MembershipReboot.WebHost
                 var handler = FederatedAuthentication.FederationConfiguration.IdentityConfiguration.SecurityTokenHandlers[typeof(SessionSecurityToken)] as SessionSecurityTokenHandler;
                 if (handler == null)
                 {
-                    Tracing.Verbose("[SamAuthenticationService.IssueToken] SessionSecurityTokenHandler is not configured");
+                    _log.Trace("[SamAuthenticationService.IssueToken] SessionSecurityTokenHandler is not configured");
                     throw new Exception("SessionSecurityTokenHandler is not configured and it needs to be.");
                 }
 
@@ -41,7 +44,7 @@ namespace BrockAllen.MembershipReboot.WebHost
             var sam = FederatedAuthentication.SessionAuthenticationModule;
             if (sam == null)
             {
-                Tracing.Verbose("[SamAuthenticationService.IssueToken] SessionAuthenticationModule is not configured");
+                _log.Trace("[SamAuthenticationService.IssueToken] SessionAuthenticationModule is not configured");
                 throw new Exception("SessionAuthenticationModule is not configured and it needs to be.");
             }
 
@@ -51,7 +54,7 @@ namespace BrockAllen.MembershipReboot.WebHost
 
             sam.WriteSessionTokenToCookie(token);
 
-            Tracing.Verbose("[SamAuthenticationService.IssueToken] cookie issued: {0}", principal.Claims.GetValue(ClaimTypes.NameIdentifier));
+            _log.Trace("[SamAuthenticationService.IssueToken] cookie issued: {0}", principal.Claims.GetValue(ClaimTypes.NameIdentifier));
         }
 
         protected override void RevokeToken()
@@ -59,7 +62,7 @@ namespace BrockAllen.MembershipReboot.WebHost
             var sam = FederatedAuthentication.SessionAuthenticationModule;
             if (sam == null)
             {
-                Tracing.Verbose("[SamAuthenticationService.RevokeToken] SessionAuthenticationModule is not configured");
+                _log.Trace("[SamAuthenticationService.RevokeToken] SessionAuthenticationModule is not configured");
                 throw new Exception("SessionAuthenticationModule is not configured and it needs to be.");
             }
 
@@ -75,6 +78,8 @@ namespace BrockAllen.MembershipReboot.WebHost
     public class SamAuthenticationService<T> : AuthenticationService<T>
         where T : UserAccount
     {
+        static ILog _log = LogProvider.For<SamAuthenticationService>();
+
         public SamAuthenticationService(UserAccountService<T> userService)
             : base(userService, FederatedAuthentication.FederationConfiguration.IdentityConfiguration.ClaimsAuthenticationManager)
         {
@@ -89,7 +94,7 @@ namespace BrockAllen.MembershipReboot.WebHost
                 var handler = FederatedAuthentication.FederationConfiguration.IdentityConfiguration.SecurityTokenHandlers[typeof(SessionSecurityToken)] as SessionSecurityTokenHandler;
                 if (handler == null)
                 {
-                    Tracing.Verbose("[SamAuthenticationService.IssueToken] SessionSecurityTokenHandler is not configured");
+                    _log.Trace("[SamAuthenticationService.IssueToken] SessionSecurityTokenHandler is not configured");
                     throw new Exception("SessionSecurityTokenHandler is not configured and it needs to be.");
                 }
                 
@@ -104,7 +109,7 @@ namespace BrockAllen.MembershipReboot.WebHost
             var sam = FederatedAuthentication.SessionAuthenticationModule;
             if (sam == null)
             {
-                Tracing.Verbose("[SamAuthenticationService.IssueToken] SessionAuthenticationModule is not configured");
+                _log.Trace("[SamAuthenticationService.IssueToken] SessionAuthenticationModule is not configured");
                 throw new Exception("SessionAuthenticationModule is not configured and it needs to be.");
             }
 
@@ -114,7 +119,7 @@ namespace BrockAllen.MembershipReboot.WebHost
             
             sam.WriteSessionTokenToCookie(token);
 
-            Tracing.Verbose("[SamAuthenticationService.IssueToken] cookie issued: {0}", principal.Claims.GetValue(ClaimTypes.NameIdentifier));
+            _log.Trace("[SamAuthenticationService.IssueToken] cookie issued: {0}", principal.Claims.GetValue(ClaimTypes.NameIdentifier));
         }
 
         protected override void RevokeToken()
@@ -122,7 +127,7 @@ namespace BrockAllen.MembershipReboot.WebHost
             var sam = FederatedAuthentication.SessionAuthenticationModule;
             if (sam == null)
             {
-                Tracing.Verbose("[SamAuthenticationService.RevokeToken] SessionAuthenticationModule is not configured");
+                _log.Trace("[SamAuthenticationService.RevokeToken] SessionAuthenticationModule is not configured");
                 throw new Exception("SessionAuthenticationModule is not configured and it needs to be.");
             }
 

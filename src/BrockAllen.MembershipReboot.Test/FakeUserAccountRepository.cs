@@ -7,10 +7,11 @@ namespace BrockAllen.MembershipReboot.Test
     public class MyUserAccount : HierarchicalUserAccount 
     {
         public string FirstName { get; set; }
-        protected internal override void AddClaim(UserClaim item)
-        {
-            base.AddClaim(item);
-        }
+        protected internal override void AddClaim(UserClaim item) =>             base.AddClaim(item);
+        //protected override void AddClaim(UserClaim item)
+        //{
+        //    base.AddClaim(item);
+        //}
     }
 
     public class FakeUserAccountRepository : QueryableUserAccountRepository<UserAccount>, IUserAccountRepository

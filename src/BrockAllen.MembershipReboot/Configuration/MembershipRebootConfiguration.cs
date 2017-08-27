@@ -11,7 +11,7 @@ namespace BrockAllen.MembershipReboot
     public class MembershipRebootConfiguration<TAccount>
         where TAccount : UserAccount
     {
-#if net46
+#if NET46
         public MembershipRebootConfiguration()
             : this(SecuritySettings.Instance)
         {
